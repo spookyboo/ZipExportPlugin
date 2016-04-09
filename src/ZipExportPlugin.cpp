@@ -209,6 +209,8 @@ namespace Ogre
 			fileNamesDestination.push_back(fileNameDestination);
 			std::ofstream dst(fileNameDestination, std::ios::binary);
 			dst << src.rdbuf();
+			dst.close();
+			src.close();
 		}
 
 		// Combine all currently created materials into one Json file
@@ -313,7 +315,7 @@ namespace Ogre
 					fin = FOPEN_FUNC(filenameInZip, "rb");
 					if (fin == NULL)
 					{
-						LogManager::getSingleton().logMessage("ZipExportPlugin: Error reading " + String(filenameInZip));
+						LogManager::getSingleton().logMessage("ZipExportPlugin: Error opening " + String(filenameInZip));
 						return false;
 					}
 				}
@@ -361,7 +363,7 @@ namespace Ogre
 				}
 
 				// Delete the file from the filesystem
-				std::remove(filenameInZip);
+				//std::remove(filenameInZip);
 
 				// Next file
 				++itDest;
@@ -379,6 +381,16 @@ namespace Ogre
 		free(buf);
 		data->mOutExportReference = exportPbsFileName + " + " + exportUnlitFileName;
 		data->mOutSuccessText = "Exported materials and json files to " + zipName;
+
+		// Delete the copied files
+		std::vector<String>::iterator itDest = fileNamesDestination.begin();
+		std::vector<String>::iterator itDestEnd = fileNamesDestination.end();
+		while (itDest != itDestEnd)
+		{
+			++itDest;
+			fileNameDestination = *itDest;
+			std::remove(fileNameDestination.c_str());
+		}
 		return true;
 	}
 
