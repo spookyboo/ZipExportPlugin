@@ -378,7 +378,7 @@ namespace Ogre
 
 		free(buf);
 		data->mOutExportReference = exportPbsFileName + " + " + exportUnlitFileName;
-		data->mOutSuccessText = "Exporting materials and json files to " + zipName;
+		data->mOutSuccessText = "Exported materials and json files to " + zipName;
 		return true;
 	}
 
