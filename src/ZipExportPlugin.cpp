@@ -97,7 +97,7 @@ namespace Ogre
 	//---------------------------------------------------------------------
 	bool ZipExportPlugin::isOpenFileDialogForExport(void) const
 	{
-		return false;
+		return true;
 	}
 	//---------------------------------------------------------------------
 	bool ZipExportPlugin::isTexturesUsedByDatablocksForExport(void) const
@@ -108,6 +108,39 @@ namespace Ogre
 	bool ZipExportPlugin::isExport (void) const
 	{
 		return true;
+	}
+	//---------------------------------------------------------------------
+	void ZipExportPlugin::performPreImportActions(void)
+	{
+		// Nothing to do
+	}
+	//---------------------------------------------------------------------
+	void ZipExportPlugin::performPostImportActions(void)
+	{
+		// Nothing to do
+	}
+	//---------------------------------------------------------------------
+	void ZipExportPlugin::performPreExportActions(void)
+	{
+		// Nothing to do
+	}
+	//---------------------------------------------------------------------
+	void ZipExportPlugin::performPostExportActions(void)
+	{
+		// Delete the copied files
+		// Note: Deleting the files as part of the export and just after creating a zip file
+		// results in a corrupted zip file. Apparently, the files are still in use, even if the zip file
+		// is already closed
+		mySleep(1);
+		std::vector<String>::iterator it = mFileNamesDestination.begin();
+		std::vector<String>::iterator itEnd = mFileNamesDestination.end();
+		String fileName;
+		while (it != itEnd)
+		{
+			fileName = *it;
+			std::remove(fileName.c_str());
+			++it;
+		}
 	}
 	//---------------------------------------------------------------------
 	const String& ZipExportPlugin::getImportMenuText (void) const
@@ -128,6 +161,8 @@ namespace Ogre
 	//---------------------------------------------------------------------
 	bool ZipExportPlugin::executeExport (HlmsEditorPluginData* data)
 	{
+		mFileNamesDestination.clear();
+
 		// Error in case no materials available
 		if (data->mInMaterialFileNameVector.size() == 0)
 		{
@@ -199,14 +234,14 @@ namespace Ogre
 		std::vector<String>::iterator itFileNamesSourceEnd = fileNamesSource.end();
 		String fileNameSource;
 		String fileNameDestination;
-		std::vector<String> fileNamesDestination;
 		for (itFileNamesSource = itFileNamesSourceStart; itFileNamesSource != itFileNamesSourceEnd; ++itFileNamesSource)
 		{
 			fileNameSource = *itFileNamesSource;
 			std::ifstream src(fileNameSource, std::ios::binary);
 			baseName = fileNameSource.substr(fileNameSource.find_last_of("/\\") + 1);
-			fileNameDestination = data->mInProjectPath + baseName;
-			fileNamesDestination.push_back(fileNameDestination);
+			fileNameDestination = data->mInImportExportPath + baseName;
+			if (!isDestinationFileAvailableInVector(fileNameDestination))
+				mFileNamesDestination.push_back(fileNameDestination);
 			std::ofstream dst(fileNameDestination, std::ios::binary);
 			dst << src.rdbuf();
 			dst.close();
@@ -218,8 +253,8 @@ namespace Ogre
 		HlmsManager* hlmsManager = root->getHlmsManager();
 		String exportPbsFileName = data->mInProjectName + ".pbs.material.json";
 		String exportUnlitFileName = data->mInProjectName + ".unlit.material.json";
-		hlmsManager->saveMaterials(HLMS_PBS, data->mInProjectPath + exportPbsFileName);
-		hlmsManager->saveMaterials(HLMS_UNLIT, data->mInProjectPath + exportUnlitFileName);
+		hlmsManager->saveMaterials(HLMS_PBS, data->mInImportExportPath + exportPbsFileName);
+		hlmsManager->saveMaterials(HLMS_UNLIT, data->mInImportExportPath + exportUnlitFileName);
 
 		// Zip all files
 		zipFile zf;
@@ -236,7 +271,7 @@ namespace Ogre
 			LogManager::getSingleton().logMessage("ZipExportPlugin: Error allocating memory");
 			return false;
 		}
-		String zipName = data->mInProjectPath + data->mInProjectName + ".zip";
+		String zipName = data->mInImportExportPath + data->mInProjectName + ".zip";
 		char zipFile[1024];
 		char filenameInZip[1024];
 		strcpy(zipFile, zipName.c_str());
@@ -257,11 +292,11 @@ namespace Ogre
 		{
 			LogManager::getSingleton().logMessage("ZipExportPlugin: Creating  " + String(zipFile));
 
-			// Add the copied textrue files to the zipfile and also add the json files to the fileNamesDestination
-			fileNamesDestination.push_back(data->mInProjectPath + exportPbsFileName);
-			fileNamesDestination.push_back(data->mInProjectPath + exportUnlitFileName);
-			std::vector<String>::iterator itDest = fileNamesDestination.begin();
-			std::vector<String>::iterator itDestEnd = fileNamesDestination.end();
+			// Add the copied textrue files to the zipfile and also add the json files to the mFileNamesDestination
+			mFileNamesDestination.push_back(data->mInImportExportPath + exportPbsFileName);
+			mFileNamesDestination.push_back(data->mInImportExportPath + exportUnlitFileName);
+			std::vector<String>::iterator itDest = mFileNamesDestination.begin();
+			std::vector<String>::iterator itDestEnd = mFileNamesDestination.end();
 			while (itDest != itDestEnd)
 			{
 				fileNameDestination = *itDest;
@@ -382,15 +417,9 @@ namespace Ogre
 		data->mOutExportReference = exportPbsFileName + " + " + exportUnlitFileName;
 		data->mOutSuccessText = "Exported materials and json files to " + zipName;
 
-		// Delete the copied files
-		std::vector<String>::iterator itDest = fileNamesDestination.begin();
-		std::vector<String>::iterator itDestEnd = fileNamesDestination.end();
-		while (itDest != itDestEnd)
-		{
-			++itDest;
-			fileNameDestination = *itDest;
-			std::remove(fileNameDestination.c_str());
-		}
+		// Deleting the copied files here, results in a corrupted zip file, so put that as a separate post-export action
+		return true;
+
 		return true;
 	}
 
@@ -497,6 +526,35 @@ namespace Ogre
 		}
 
 		return largeFile;
+	}
+
+	//---------------------------------------------------------------------
+	bool ZipExportPlugin::isDestinationFileAvailableInVector(const String& fileName)
+	{
+		std::vector<String>::iterator itDest = mFileNamesDestination.begin();
+		std::vector<String>::iterator itDestEnd = mFileNamesDestination.end();
+		String compareFileName = fileName;
+		Ogre::StringUtil::toUpperCase(compareFileName);
+		String destFileName;
+		while (itDest != itDestEnd)
+		{
+			destFileName = *itDest;
+			Ogre::StringUtil::toUpperCase(destFileName);
+			if (Ogre::StringUtil::match(compareFileName, destFileName))
+				return true;
+
+			itDest++;
+		}
+
+		return false;
+	}
+
+	//---------------------------------------------------------------------
+	void ZipExportPlugin::mySleep(clock_t sec)
+	{
+		clock_t start_time = clock();
+		clock_t end_time = sec * 1000 + start_time;
+		while (clock() != end_time);
 	}
 
 }

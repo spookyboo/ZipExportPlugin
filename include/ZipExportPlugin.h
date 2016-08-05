@@ -65,12 +65,21 @@ namespace Ogre
 			virtual const String& getExportMenuText (void) const;
 			virtual bool executeImport(HlmsEditorPluginData* data);
 			virtual bool executeExport(HlmsEditorPluginData* data);
+			virtual void performPreImportActions(void);
+			virtual void performPostImportActions(void);
+			virtual void performPreExportActions(void);
+			virtual void performPostExportActions(void);
 
 		protected:
 			bool loadMaterial(const String& fileName);
 			const String& getFullFileNameFromTextureList(const String& baseName, HlmsEditorPluginData* data);
 			const String& getFullFileNameFromResources(const String& baseName, HlmsEditorPluginData* data);
 			int isLargeFile(const char* filename);
+			bool isDestinationFileAvailableInVector(const String& fileName);
+			void mySleep(clock_t sec);
+
+		private:
+			std::vector<String> mFileNamesDestination;
 	};
 }
 
