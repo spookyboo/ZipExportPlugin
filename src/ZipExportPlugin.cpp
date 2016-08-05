@@ -143,6 +143,11 @@ namespace Ogre
 		}
 	}
 	//---------------------------------------------------------------------
+	unsigned int ZipExportPlugin::getActionFlag(void)
+	{
+		return 0;
+	}
+	//---------------------------------------------------------------------
 	const String& ZipExportPlugin::getImportMenuText (void) const
 	{
 		return gImportMenuText;
@@ -239,7 +244,7 @@ namespace Ogre
 			fileNameSource = *itFileNamesSource;
 			std::ifstream src(fileNameSource, std::ios::binary);
 			baseName = fileNameSource.substr(fileNameSource.find_last_of("/\\") + 1);
-			fileNameDestination = data->mInImportExportPath + baseName;
+			fileNameDestination = data->mInExportPath + baseName;
 			if (!isDestinationFileAvailableInVector(fileNameDestination))
 				mFileNamesDestination.push_back(fileNameDestination);
 			std::ofstream dst(fileNameDestination, std::ios::binary);
@@ -253,8 +258,8 @@ namespace Ogre
 		HlmsManager* hlmsManager = root->getHlmsManager();
 		String exportPbsFileName = data->mInProjectName + ".pbs.material.json";
 		String exportUnlitFileName = data->mInProjectName + ".unlit.material.json";
-		hlmsManager->saveMaterials(HLMS_PBS, data->mInImportExportPath + exportPbsFileName);
-		hlmsManager->saveMaterials(HLMS_UNLIT, data->mInImportExportPath + exportUnlitFileName);
+		hlmsManager->saveMaterials(HLMS_PBS, data->mInExportPath + exportPbsFileName);
+		hlmsManager->saveMaterials(HLMS_UNLIT, data->mInExportPath + exportUnlitFileName);
 
 		// Zip all files
 		zipFile zf;
@@ -271,7 +276,7 @@ namespace Ogre
 			LogManager::getSingleton().logMessage("ZipExportPlugin: Error allocating memory");
 			return false;
 		}
-		String zipName = data->mInImportExportPath + data->mInProjectName + ".zip";
+		String zipName = data->mInExportPath + data->mInProjectName + ".zip";
 		char zipFile[1024];
 		char filenameInZip[1024];
 		strcpy(zipFile, zipName.c_str());
@@ -293,8 +298,8 @@ namespace Ogre
 			LogManager::getSingleton().logMessage("ZipExportPlugin: Creating  " + String(zipFile));
 
 			// Add the copied textrue files to the zipfile and also add the json files to the mFileNamesDestination
-			mFileNamesDestination.push_back(data->mInImportExportPath + exportPbsFileName);
-			mFileNamesDestination.push_back(data->mInImportExportPath + exportUnlitFileName);
+			mFileNamesDestination.push_back(data->mInExportPath + exportPbsFileName);
+			mFileNamesDestination.push_back(data->mInExportPath + exportUnlitFileName);
 			std::vector<String>::iterator itDest = mFileNamesDestination.begin();
 			std::vector<String>::iterator itDestEnd = mFileNamesDestination.end();
 			while (itDest != itDestEnd)
