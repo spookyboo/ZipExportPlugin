@@ -55,7 +55,7 @@ namespace Ogre
 #define WRITEBUFFERSIZE (16384)
 
 	static const String gImportMenuText = "";
-	static const String gExportMenuText = "ZipExport: Export material browser to Zip";
+	static const String gExportMenuText = "Material browser to Zip";
 	static String gTempString = "";
 	//---------------------------------------------------------------------
 	ZipExportPlugin::ZipExportPlugin()
