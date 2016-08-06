@@ -52,10 +52,11 @@ namespace Ogre
 #define FTELLO_FUNC(stream) ftello64(stream)
 #define FSEEKO_FUNC(stream, offset, origin) fseeko64(stream, offset, origin)
 #endif
-#define WRITEBUFFERSIZE (16384)
+//#define WRITEBUFFERSIZE (32768)
+#define WRITEBUFFERSIZE (65536)
 
 	static const String gImportMenuText = "";
-	static const String gExportMenuText = "Material browser to Zip";
+	static const String gExportMenuText = "Material browser to zip";
 	static String gTempString = "";
 	//---------------------------------------------------------------------
 	ZipExportPlugin::ZipExportPlugin()
