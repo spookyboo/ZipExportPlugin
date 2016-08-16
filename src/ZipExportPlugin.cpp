@@ -53,7 +53,7 @@ namespace Ogre
 #define FSEEKO_FUNC(stream, offset, origin) fseeko64(stream, offset, origin)
 #endif
 //#define WRITEBUFFERSIZE (32768)
-#define WRITEBUFFERSIZE (65536)
+#define WRITEBUFFERSIZE (131072)
 
 	static const String gImportMenuText = "";
 	static const String gExportMenuText = "Material browser to zip";
@@ -146,7 +146,7 @@ namespace Ogre
 	//---------------------------------------------------------------------
 	unsigned int ZipExportPlugin::getActionFlag(void)
 	{
-		return 0;
+		return	PAF_PRE_EXPORT_DELETE_ALL_DATABLOCKS;
 	}
 	//---------------------------------------------------------------------
 	const String& ZipExportPlugin::getImportMenuText (void) const
