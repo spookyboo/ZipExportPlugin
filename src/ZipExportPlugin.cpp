@@ -86,24 +86,9 @@ namespace Ogre
     {
     }
 	//---------------------------------------------------------------------
-	bool ZipExportPlugin::isOpenFileDialogForImport(void) const
-	{
-		return false;
-	}
-	//---------------------------------------------------------------------
 	bool ZipExportPlugin::isImport (void) const
 	{
 		return false;
-	}
-	//---------------------------------------------------------------------
-	bool ZipExportPlugin::isOpenFileDialogForExport(void) const
-	{
-		return true;
-	}
-	//---------------------------------------------------------------------
-	bool ZipExportPlugin::isTexturesUsedByDatablocksForExport(void) const
-	{
-		return true;
 	}
 	//---------------------------------------------------------------------
 	bool ZipExportPlugin::isExport (void) const
@@ -146,7 +131,12 @@ namespace Ogre
 	//---------------------------------------------------------------------
 	unsigned int ZipExportPlugin::getActionFlag(void)
 	{
-		return	PAF_PRE_EXPORT_DELETE_ALL_DATABLOCKS;
+		// 1. Open a dialog to directory were the exported files are saved
+		// 2. The HLMS Editor passes all texture filenames used by the datablocks in the material browser to the plugin
+		// 3. Delete all datablocks before the exporting is performed
+		return	PAF_PRE_EXPORT_OPEN_DIR_DIALOG |
+			PAF_PRE_EXPORT_TEXTURES_USED_BY_DATABLOCK |
+			PAF_PRE_EXPORT_DELETE_ALL_DATABLOCKS;
 	}
 	//---------------------------------------------------------------------
 	const String& ZipExportPlugin::getImportMenuText (void) const
@@ -420,7 +410,7 @@ namespace Ogre
 		}
 
 		free(buf);
-		data->mOutExportReference = exportPbsFileName + " + " + exportUnlitFileName;
+		data->mOutReference = exportPbsFileName + " + " + exportUnlitFileName;
 		data->mOutSuccessText = "Exported materials and json files to " + zipName;
 
 		// Deleting the copied files here, results in a corrupted zip file, so put that as a separate post-export action
