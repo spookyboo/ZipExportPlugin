@@ -7,4 +7,4 @@ because it makes use of both HLMS Editor and Ogre3d include files).
 The __Zip Export Plugin__ makes use of the generic plugin mechanism of Ogre3D.
 
 **Installation:**  
-Just add the plugin to the plugins.cfg file (under HLMSEditor/bin) with the entry _Plugin=ZipExport_ ; the HLMS Editor recognizes it if you have followed the rules above.
+Just add the plugin entry _Plugin=ZipExport_ to the plugins.cfg file (under HLMSEditor/bin); the HLMS Editor recognizes whether it is a valid plugin.
