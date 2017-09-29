@@ -56,7 +56,7 @@ namespace Ogre
 #define WRITEBUFFERSIZE (131072)
 
 	static const String gImportMenuText = "";
-	static const String gExportMenuText = "Material browser to zip";
+	static const String gExportMenuText = "Export materialbrowser to Ogre3d zip";
 	static String gTempString = "";
 	//---------------------------------------------------------------------
 	ZipExportPlugin::ZipExportPlugin()
@@ -162,7 +162,7 @@ namespace Ogre
 		// Error in case no materials available
 		if (data->mInMaterialFileNameVector.size() == 0)
 		{
-			data->mOutSuccessText = "No materials to export";
+			data->mOutSuccessText = "executeExport: No materials to export";
 			return true;
 		}
 
