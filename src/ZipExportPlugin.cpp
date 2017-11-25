@@ -52,8 +52,7 @@ namespace Ogre
 #define FTELLO_FUNC(stream) ftello64(stream)
 #define FSEEKO_FUNC(stream, offset, origin) fseeko64(stream, offset, origin)
 #endif
-//#define WRITEBUFFERSIZE (32768)
-#define WRITEBUFFERSIZE (131072)
+#define WRITEBUFFERSIZE (262144)
 
 	static const String gImportMenuText = "";
 	static const String gExportMenuText = "Export materialbrowser to Ogre3d zip";
